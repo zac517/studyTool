@@ -8,7 +8,6 @@
 // @match        https://www.pigai.org/*
 // @icon         https://one.hfut.edu.cn/favicon.ico
 // @run-at       document-start
-// @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @downloadURL https://update.greasyfork.org/scripts/532290/%E5%90%88%E5%B7%A5%E5%A4%A7%E5%AD%A6%E4%B9%A0%E5%8A%A9%E6%89%8B.user.js
 // @updateURL https://update.greasyfork.org/scripts/532290/%E5%90%88%E5%B7%A5%E5%A4%A7%E5%AD%A6%E4%B9%A0%E5%8A%A9%E6%89%8B.meta.js
@@ -16,9 +15,6 @@
 
 (function() {
     'use strict';
-
-    // 自定义的 User-Agent，这里伪装成 Chrome
-    const customUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0';
 
     // 后续可以在这里添加更多域名和对应功能的映射
     const domainFunctions = {
@@ -106,9 +102,6 @@
             }
         },
     };
-
-    
-
 
     const currentHostname = unsafeWindow.location.hostname;
     for (const domain in domainFunctions) {
