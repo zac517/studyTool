@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          学习助手
 // @namespace     https://zac.social/
-// @version       0.2.0
+// @version       0.3.0
 // @description   学习通测试成绩查看，批改网解除复制粘贴限制。
 // @author        zac517
 // @match         mooc1.chaoxing.com/*
