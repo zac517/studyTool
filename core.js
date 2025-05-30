@@ -20,7 +20,7 @@ function getSite(path, node) {
  */
 function core(siteConfig) {
     console.log('学习助手：脚本已启用');
-    const site = getSite(unsafewindow.location.href, siteConfig);
+    const site = getSite(unsafeWindow.location.href, siteConfig);
 
     if (!site) {
         console.log('学习助手：当前页面没有待执行的脚本');
