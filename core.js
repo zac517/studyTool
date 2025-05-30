@@ -1,5 +1,3 @@
-// 注意：这个文件不需要油猴的元数据块
-
 /**
  * 递归匹配网站配置，找到最适合当前 URL 的配置。
  * @param {string} path - 当前页面的完整 URL。
@@ -7,45 +5,23 @@
  * @returns {object | null} - 匹配到的网站配置对象，如果没有则返回 null。
  */
 function getSite(path, node) {
-    let bestMatch = null;
-    let highestSpecificity = -1;
-
-    // 内部递归函数，用于查找最深的匹配项
-    function findDeeper(currentNode, currentPath) {
-        let potentialMatch = null;
-        let bestChildMatch = null;
-        let bestChildSpecificity = -1;
-
-        for (const key in currentNode) {
-            if (key === 'site') continue;
-
-            if (currentPath.includes(key)) {
-                const childMatch = findDeeper(currentNode[key], currentPath);
-                if (childMatch.match && key.length > bestChildSpecificity) {
-                    bestChildSpecificity = key.length;
-                    bestChildMatch = childMatch.match;
-                }
-            }
+    for (const key in node) {
+        if (key === 'site') continue;
+        if (path.includes(key)) {
+            return getSite(path, node[key]);
         }
-        
-        if (bestChildMatch) {
-            potentialMatch = bestChildMatch;
-        } else if (currentNode.site) {
-            potentialMatch = currentNode.site;
-        }
-
-        return { match: potentialMatch, specificity: bestChildSpecificity };
     }
-
-    const result = findDeeper(node, path);
-    return result.match;
+    return node.site || null;
 }
 
 /**
  * 核心执行函数，负责根据匹配到的网站配置来执行相应的逻辑。
  * @param {object | null} site - 通过匹配逻辑找到的当前网站的配置对象。
  */
-function core(site) {
+function core(siteConfig) {
+    console.log('学习助手：脚本已启用');
+    const site = getSite(unsafewindow.location.href, siteConfig);
+
     if (!site) {
         console.log('学习助手：当前页面没有待执行的脚本');
         return; // 如果没有匹配的配置，则直接返回
