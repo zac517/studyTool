@@ -1,6 +1,47 @@
 // 注意：这个文件不需要油猴的元数据块
 
 /**
+ * 递归匹配网站配置，找到最适合当前 URL 的配置。
+ * @param {string} path - 当前页面的完整 URL。
+ * @param {object} node - 当前正在搜索的配置节点。
+ * @returns {object | null} - 匹配到的网站配置对象，如果没有则返回 null。
+ */
+function getSite(path, node) {
+    let bestMatch = null;
+    let highestSpecificity = -1;
+
+    // 内部递归函数，用于查找最深的匹配项
+    function findDeeper(currentNode, currentPath) {
+        let potentialMatch = null;
+        let bestChildMatch = null;
+        let bestChildSpecificity = -1;
+
+        for (const key in currentNode) {
+            if (key === 'site') continue;
+
+            if (currentPath.includes(key)) {
+                const childMatch = findDeeper(currentNode[key], currentPath);
+                if (childMatch.match && key.length > bestChildSpecificity) {
+                    bestChildSpecificity = key.length;
+                    bestChildMatch = childMatch.match;
+                }
+            }
+        }
+        
+        if (bestChildMatch) {
+            potentialMatch = bestChildMatch;
+        } else if (currentNode.site) {
+            potentialMatch = currentNode.site;
+        }
+
+        return { match: potentialMatch, specificity: bestChildSpecificity };
+    }
+
+    const result = findDeeper(node, path);
+    return result.match;
+}
+
+/**
  * 核心执行函数，负责根据匹配到的网站配置来执行相应的逻辑。
  * @param {object | null} site - 通过匹配逻辑找到的当前网站的配置对象。
  */
@@ -12,76 +53,68 @@ function core(site) {
 
     console.log('学习助手：开始执行当前页面的脚本');
 
-    // 检查是否需要监听元素或脚本加载
-    const onElementAddedConfig = site.onElementAdded ? site.onElementAdded() : {};
-    const onScriptLoadedConfig = site.onScriptLoaded ? site.onScriptLoaded() : {};
+    // 准备配置
+    const onElementAddedConfig = site.onElementAdded ? site.onElementAdded.call(site) : {};
+    const onScriptLoadedConfig = site.onScriptLoaded ? site.onScriptLoaded.call(site) : {};
 
+    // 监听元素或脚本加载
     if (Object.keys(onElementAddedConfig).length > 0 || Object.keys(onScriptLoadedConfig).length > 0) {
         console.log('学习助手：正在劫持元素');
-        const callback = function (mutationsList) {
+        const observer = new MutationObserver((mutationsList) => {
             for (const mutation of mutationsList) {
                 if (mutation.type === 'childList') {
                     for (const addedNode of mutation.addedNodes) {
+                        if (addedNode.nodeType !== Node.ELEMENT_NODE) continue;
+                        
                         // 处理 onElementAdded
-                        if (site.onElementAdded) {
-                            Object.keys(onElementAddedConfig).forEach((element) => {
-                                if (onElementAddedConfig[element].times !== 0 && addedNode.matches && addedNode.matches(element)) {
-                                    onElementAddedConfig[element].callback(addedNode);
-                                    onElementAddedConfig[element].times -= 1;
-                                }
-                            });
-                        }
+                        Object.keys(onElementAddedConfig).forEach((selector) => {
+                            if (onElementAddedConfig[selector].times > 0 && addedNode.matches(selector)) {
+                                onElementAddedConfig[selector].callback(addedNode);
+                                onElementAddedConfig[selector].times--;
+                            }
+                        });
+
                         // 处理 onScriptLoaded
-                        if (site.onScriptLoaded) {
-                             Object.keys(onScriptLoadedConfig).forEach((element) => {
-                                if (onScriptLoadedConfig[element].times !== 0 && addedNode.matches && addedNode.matches(element)) {
-                                    addedNode.onload = onScriptLoadedConfig[element].callback;
-                                    onScriptLoadedConfig[element].times -= 1;
-                                }
-                            });
-                        }
+                        Object.keys(onScriptLoadedConfig).forEach((selector) => {
+                            if (onScriptLoadedConfig[selector].times > 0 && addedNode.matches(selector)) {
+                                addedNode.onload = onScriptLoadedConfig[selector].callback;
+                                onScriptLoadedConfig[selector].times--;
+                            }
+                        });
                     }
                 }
             }
-        };
-
-        const observer = new MutationObserver(callback);
-        observer.observe(document, { attributes: true, childList: true, subtree: true });
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
     }
 
     // 处理页面加载完成后的逻辑
     if (site.onPageLoaded) {
         console.log('学习助手：正在执行页面加载后的逻辑');
-        // 使用 unsafeWindow.addEventListener 以确保在正确的上下文中执行
-        unsafeWindow.addEventListener('load', () => site.onPageLoaded());
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            site.onPageLoaded.call(site);
+        } else {
+            unsafeWindow.addEventListener('load', () => site.onPageLoaded.call(site));
+        }
     }
 
     console.log('学习助手：脚本已执行完成');
 }
 
-
 /**
  * 创建并管理可拖动的侧边栏菜单。
  */
 function createMenu() {
+    // ... createMenu 函数的完整代码在这里，保持不变 ...
     const css = `
         #study-tool-menu {
-            display: inline-block !important;
-            margin: 0 !important;
-            position: fixed !important;
-            left: 40px;
-            top: calc(50vh - 150px);
-            width: 200px;
-            height: 300px;
-            border-radius: 10px !important;
-            background-color: white !important;
+            display: inline-block !important; margin: 0 !important; position: fixed !important;
+            left: 40px; top: calc(50vh - 150px); width: 200px; height: 300px;
+            border-radius: 10px !important; background-color: white !important;
             border: 1px solid rgba(0, 0, 0, 0.1) !important;
             box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.05) !important;
-            padding: 10px !important;
-            z-index: 9999 !important;
-            cursor: grab;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
+            padding: 10px !important; z-index: 9999 !important; cursor: grab;
+            overflow: hidden !important; box-sizing: border-box !important;
         }
         #study-tool-menu.collapsed-left, #study-tool-menu.collapsed-right { height: 60px !important; }
         #study-tool-menu.collapsed-left { left: -190px; }
@@ -89,72 +122,42 @@ function createMenu() {
         #study-tool-menu.collapsed-left:hover { left: -140px; }
         #study-tool-menu.collapsed-right:hover { left: calc(100% - 60px); }
     `;
-
     const style = document.createElement('style');
     style.textContent = css;
     document.head.appendChild(style);
-
     const div = document.createElement('div');
     div.id = 'study-tool-menu';
-    div.innerHTML = `
-        <div>666</div>
-        <h1>123</h1>
-    `;
-
-    let isDragging = false;
-    let offsetX, offsetY, startX, startY;
-
+    div.innerHTML = `<div>666</div><h1>123</h1>`;
+    let isDragging = false, offsetX, offsetY, startX, startY;
     div.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        div.style.cursor = 'grabbing';
-        div.style.transition = 'none';
+        isDragging = true; div.style.cursor = 'grabbing'; div.style.transition = 'none';
         const divRect = div.getBoundingClientRect();
-        offsetX = e.clientX - divRect.left;
-        offsetY = e.clientY - divRect.top;
-        startX = e.clientX;
-        startY = e.clientY;
+        offsetX = e.clientX - divRect.left; offsetY = e.clientY - divRect.top;
+        startX = e.clientX; startY = e.clientY;
     });
-
     document.addEventListener('mousemove', (e) => {
         if (isDragging) {
             div.style.left = (e.clientX - offsetX) + 'px';
             div.style.top = (e.clientY - offsetY) + 'px';
         }
     });
-
     document.addEventListener('mouseup', (e) => {
-        isDragging = false;
-        div.style.transition = 'left 0.5s';
-        const windowWidth = window.innerWidth;
-        const divRect = div.getBoundingClientRect();
+        isDragging = false; div.style.transition = 'left 0.5s';
+        const windowWidth = window.innerWidth, divRect = div.getBoundingClientRect();
         if (divRect.left <= 0 || divRect.right >= windowWidth) {
-            if (startX === e.clientX && startY === e.clientY) {
-                expandMenu();
-            } else {
-                if (divRect.left <= 0) {
-                    div.style.left = '';
-                    div.classList.add('collapsed-left');
-                } else {
-                    div.style.left = '';
-                    div.classList.add('collapsed-right');
-                }
+            if (startX === e.clientX && startY === e.clientY) expandMenu();
+            else {
+                if (divRect.left <= 0) { div.style.left = ''; div.classList.add('collapsed-left'); }
+                else { div.style.left = ''; div.classList.add('collapsed-right'); }
             }
-        } else {
-            expandMenu();
-        }
+        } else expandMenu();
         div.style.cursor = 'grab';
     });
-
     function expandMenu() {
         div.classList.remove('collapsed-left', 'collapsed-right');
-        const windowWidth = window.innerWidth;
-        const divRect = div.getBoundingClientRect();
+        const windowWidth = window.innerWidth, divRect = div.getBoundingClientRect();
         if (divRect.left < 0) div.style.left = '40px';
         else if (divRect.right > windowWidth) div.style.left = 'calc(100% - 240px)';
     }
-
-    // 在页面加载完毕后添加菜单，避免影响页面渲染
-    window.addEventListener('load', () => {
-        document.body.appendChild(div);
-    });
+    document.body.appendChild(div);
 }
