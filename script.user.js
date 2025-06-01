@@ -10,7 +10,7 @@
 // @grant         unsafeWindow
 // @grant         GM_setClipboard
 // @grant         GM_addStyle
-// @require       https://raw.githubusercontent.com/zac517/studyTool/main/core.js
+// @require       https://update.greasyfork.org/scripts/537952/1599500/%E5%AD%A6%E4%B9%A0%E5%8A%A9%E6%89%8B%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6.js
 // @resource      CORE_CSS https://raw.githubusercontent.com/zac517/studyTool/refs/heads/main/core.css
 // ==/UserScript==
 
