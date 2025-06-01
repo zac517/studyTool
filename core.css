@@ -1,0 +1,223 @@
+* {
+position: relative;
+}
+#study-tool-menu {
+    position: fixed;
+    left: 40px;
+    top: calc(50vh - 160px);
+    width: 200px;
+    z-index: 999;
+    --black: #303030;
+    border: 2px solid black;
+    height: 300px;
+    user-select: none;
+    overflow: hidden;
+}
+
+.tab-bar {
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
+    background-color: black;
+    overflow: hidden;
+}
+
+.tab-button {
+    width: calc(100% - 100px);
+    text-align: center;
+    line-height: 40px  !important;
+    cursor: pointer;
+    font-size: 13px  !important;
+    color: white;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.tab-button[data-tab="config-panel"].active ~ .tab-bg {
+    left: 0;
+}
+
+.tab-button[data-tab="output-panel"].active ~ .tab-bg {
+    left: 100px;
+}
+
+.tab-button.active {
+    width: 100px;
+}
+
+.tab-bg {
+    position: absolute;
+    height: 100%;
+    width: 100px;
+    left: 0;
+    z-index: 2;
+    backdrop-filter: invert(1);
+    transition: .3s;
+    top : 0;
+    line-height: 40px !important;
+    text-align: center;
+}
+
+.content-panels {
+    overflow: hidden;
+    height: 260px;
+    background-color: #ffffff;
+}
+
+.content-panels::-webkit-scrollbar {
+    display: none;
+}
+
+.panel-info {
+    line-height: 40px !important;
+    font-size: 13px !important;
+    text-align: center;
+} 
+
+
+.tab-panel { 
+    display: none;
+    height: 100%;
+    font-size: 13px  !important;
+}
+
+.tab-panel.active-panel { display: block; }
+
+
+/* 配置面板内的表单项样式 */
+.form-item { 
+    height: 40px;
+    padding: 0 10px;
+    line-height: 40px !important;
+    color: #303030;
+}
+
+.form-item label { 
+    font-size: 13px  !important;
+}
+
+.switch {
+    position: absolute;
+    display: inline-block;
+    width: 30px;
+    height: 16px;
+    margin: 12px 10px;
+    right: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider { 
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 16px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { 
+    background-color: #303030; 
+}
+
+input:checked + .slider:before { transform: translateX(14px); }
+
+#study-tool-menu .config-button { 
+    font-size: 13px  !important;
+    border-top: 1px solid #d9d9d9;
+    border-bottom: 1px solid #d9d9d9;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-sizing: border-box;
+    height: 40px;
+    line-height: 38px  !important;
+    padding: 0 10px;
+    
+}
+
+#study-tool-menu .config-button:hover .config-button-bg { 
+    max-width: 100%;
+    width: 100%;
+    padding: 0 10px;
+}
+
+#study-tool-menu .config-button-bg {
+    height: 100%;
+    transition: width .3s;
+    position: absolute;
+    max-width: 0;
+    z-index: 2;
+    background-color: var(--black);
+    top: 0;
+    left: 0;
+    color: white;
+    overflow: hidden;
+    width: 0;
+    font-size: 13px !important;
+}
+    
+
+/* 日志面板样式 */
+#output-panel { 
+    font-family: monospace;
+    color: #444;
+    line-height: 1.4 !important;
+}
+
+.log-entry {
+    padding: 6px 4px;
+    border-bottom: 1px solid #d9d9d9;
+    word-break: break-all;
+    font-size: 11px  !important;
+}
+
+/* 折叠样式 */
+#study-tool-menu.collapsed {
+    width: 100px;
+    height: 40px !important;
+    overflow: hidden;
+}
+
+#study-tool-menu.collapsed .tab-bar {
+    background-color: white;
+    transition: 0.3s;
+}
+
+#study-tool-menu.collapsed:hover .tab-bar {
+    background-color: black;
+}
+
+#study-tool-menu.collapsed .tab-bg {
+    left: 0;
+}
+
+#study-tool-menu.collapsed .tab-button {
+    display: none;
+}
+#study-tool-menu.collapsed .content-panels {
+    display: none;
+}
+
+#study-tool-menu.collapsed-left { left: -90px; }
+#study-tool-menu.collapsed-right { left: calc(100% - 15px); }
+#study-tool-menu.collapsed-left:hover { left: 0; }
+#study-tool-menu.collapsed-right:hover { left: calc(100% - 100px); }
