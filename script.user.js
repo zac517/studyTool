@@ -19,6 +19,7 @@
     const window = unsafeWindow;
     const css = GM_getResourceText('CORE_CSS');
     GM_addStyle(css);
+    
 
     const siteConfigs = {
         'mooc1.chaoxing.com': {
